@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>국기 색깔 맞추기 게임 - 50개국 수정판</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f6f8;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #1f4e79;
+      margin-bottom: 8px;
+    }
+
+    .game-box {
+      width: 680px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .flag {
+      width: 400px;
+      height: 240px;
+      border: 2px solid #333;
+      margin: 20px auto;
+      display: flex;
+      background: white;
+    }
+
+    .horizontal {
+      flex-direction: column;
+    }
+
+    .vertical {
+      flex-direction: row;
+    }
+
+    .colorOnly {
+      flex-direction: row;
+    }
+
+    .slot {
+      border: 1px solid #ccc;
+      cursor: pointer;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(0,0,0,0.35);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .palette {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px;
+      flex-wrap: wrap;
+    }
+
+    .color-btn {
+      width: 58px;
+      height: 58px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .color-btn.selected {
+      outline: 4px solid #1f77b4;
+      outline-offset: 3px;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      min-height: 28px;
+    }
+
+    .note {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .status {
+      font-size: 15px;
+      color: #333;
+      margin-top: 10px;
+    }
+
+    .question-note {
+      font-size: 14px;
+      color: #7a4b00;
+      background: #fff7e6;
+      border: 1px solid #ffd38a;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: 10px auto 0 auto;
+      width: 520px;
+      line-height: 1.45;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #666;
+      margin-top: 14px;
+      line-height: 1.4;
+    }
+  </style>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1f4e79">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+</head>
+
+<body>
+
+  <div class="game-box">
+    <h1>국기 색깔 맞추기 게임</h1>
+
+    <div class="status">
+      문제: <span id="questionNo">1</span> / <span id="totalNo">50</span>
+    </div>
+
+    <h2 id="countryName"></h2>
+    <p>색깔을 선택한 뒤, 국기 칸을 클릭하세요.</p>
+    <p class="note">
+      문제마다 해당 나라 국기에 들어가는 색상만 선택지로 표시됩니다.<br>
+      정답이면 다음 문제로 이동하고, 오답이면 같은 문제가 자동 리셋됩니다.
+    </p>
+
+    <div id="questionNote" class="question-note"></div>
+
+    <div id="flag" class="flag"></div>
+
+    <div id="palette" class="palette"></div>
+
+    <p>점수: <span id="score">0</span></p>
+    <div id="message"></div>
+
+    <p class="small">
+      ※ 일부 국기는 별, 문장, 문자, 태양, 초승달 등 문양을 직접 그리지 않고 색상만 선택하도록 단순화했습니다.<br>
+      ※ 색띠형 국기는 색의 배열 순서까지 맞혀야 하며, 문양형 국기는 포함 색상만 맞히면 됩니다.
+    </p>
+  </div>
+
+  <script>
+    const colorMap = {
+      black: "#000000",
+      red: "#d52b1e",
+      darkred: "#8c1b2b",
+      yellow: "#ffcc00",
+      blue: "#0055a4",
+      darkblue: "#0033a0",
+      lightblue: "#75aadb",
+      white: "#ffffff",
+      green: "#009246",
+      darkgreen: "#007a3d",
+      orange: "#ff8200",
+      maroon: "#9e1b34"
+    };
+
+    const colorNameMap = {
+      black: "검정",
+      red: "빨강",
+      darkred: "진한 빨강",
+      yellow: "노랑",
+      blue: "파랑",
+      darkblue: "진한 파랑",
+      lightblue: "하늘색",
+      white: "흰색",
+      green: "초록",
+      darkgreen: "진한 초록",
+      orange: "주황",
+      maroon: "자주색"
+    };
+
+    const questions = [
+      { country: "독일", type: "horizontal", mode: "arrange", answer: ["black", "red", "yellow"] },
+      { country: "프랑스", type: "vertical", mode: "arrange", answer: ["blue", "white", "red"] },
+      { country: "이탈리아", type: "vertical", mode: "arrange", answer: ["green", "white", "red"] },
+      { country: "네덜란드", type: "horizontal", mode: "arrange", answer: ["red", "white", "blue"] },
+      { country: "러시아", type: "horizontal", mode: "arrange", answer: ["white", "blue", "red"] },
+      { country: "벨기에", type: "vertical", mode: "arrange", answer: ["black", "yellow", "red"] },
+      { country: "아일랜드", type: "vertical", mode: "arrange", answer: ["green", "white", "orange"] },
+      { country: "오스트리아", type: "horizontal", mode: "arrange", answer: ["red", "white", "red"] },
+      { country: "불가리아", type: "horizontal", mode: "arrange", answer: ["white", "green", "red"] },
+      { country: "헝가리", type: "horizontal", mode: "arrange", answer: ["red", "white", "green"] },
+
+      { country: "루마니아", type: "vertical", mode: "arrange", answer: ["blue", "yellow", "red"] },
+      { country: "말리", type: "vertical", mode: "arrange", answer: ["green", "yellow", "red"] },
+      { country: "기니", type: "vertical", mode: "arrange", answer: ["red", "yellow", "green"] },
+      { country: "아르메니아", type: "horizontal", mode: "arrange", answer: ["red", "blue", "orange"] },
+      { country: "에스토니아", type: "horizontal", mode: "arrange", answer: ["blue", "black", "white"] },
+      { country: "리투아니아", type: "horizontal", mode: "arrange", answer: ["yellow", "green", "red"] },
+      { country: "라트비아", type: "horizontal", mode: "arrange", answer: ["maroon", "white", "maroon"], weights: [2, 1, 2] },
+      { country: "룩셈부르크", type: "horizontal", mode: "arrange", answer: ["red", "white", "lightblue"] },
+      { country: "예멘", type: "horizontal", mode: "arrange", answer: ["red", "white", "black"] },
+      { country: "가봉", type: "horizontal", mode: "arrange", answer: ["green", "yellow", "blue"] },
+
+      { country: "시에라리온", type: "horizontal", mode: "arrange", answer: ["green", "white", "blue"] },
+      { country: "보츠와나", type: "horizontal", mode: "arrange", answer: ["lightblue", "white", "black", "white", "lightblue"], weights: [9, 1, 4, 1, 9] },
+      { country: "태국", type: "horizontal", mode: "arrange", answer: ["red", "white", "blue", "white", "red"], weights: [1, 1, 2, 1, 1] },
+      { country: "코스타리카", type: "horizontal", mode: "arrange", answer: ["blue", "white", "red", "white", "blue"], weights: [1, 1, 2, 1, 1] },
+      { country: "콜롬비아", type: "horizontal", mode: "arrange", answer: ["yellow", "blue", "red"], weights: [2, 1, 1] },
+      { country: "볼리비아", type: "horizontal", mode: "arrange", answer: ["red", "yellow", "green"] },
+      { country: "페루", type: "vertical", mode: "arrange", answer: ["red", "white", "red"] },
+      { country: "폴란드", type: "horizontal", mode: "arrange", answer: ["white", "red"] },
+      { country: "우크라이나", type: "horizontal", mode: "arrange", answer: ["blue", "yellow"] },
+      { country: "모나코", type: "horizontal", mode: "arrange", answer: ["red", "white"] },
+
+      { country: "아르헨티나", type: "colorOnly", mode: "colorOnly", answer: ["lightblue", "white", "yellow"], note: "태양 문양은 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "가나", type: "colorOnly", mode: "colorOnly", answer: ["red", "yellow", "green", "black"], note: "검은 별은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "세네갈", type: "colorOnly", mode: "colorOnly", answer: ["green", "yellow", "red"], note: "별 문양은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "카메룬", type: "colorOnly", mode: "colorOnly", answer: ["green", "red", "yellow"], note: "별 문양은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "르완다", type: "colorOnly", mode: "colorOnly", answer: ["lightblue", "yellow", "green"], note: "태양 문양은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "리비아", type: "colorOnly", mode: "colorOnly", answer: ["red", "black", "green", "white"], note: "초승달과 별은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "시리아", type: "colorOnly", mode: "colorOnly", answer: ["red", "white", "black", "green"], note: "초록색 별은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "이집트", type: "colorOnly", mode: "colorOnly", answer: ["red", "white", "black", "yellow"], note: "독수리 문장은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "이라크", type: "colorOnly", mode: "colorOnly", answer: ["red", "white", "black", "green"], note: "문자 문양은 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "이란", type: "colorOnly", mode: "colorOnly", answer: ["green", "white", "red"], note: "문양은 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+
+      { country: "인도", type: "colorOnly", mode: "colorOnly", answer: ["orange", "white", "green", "blue"], note: "아소카 차크라는 도형으로 그리지 않고 파랑 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "일본", type: "colorOnly", mode: "colorOnly", answer: ["white", "red"], note: "가운데 원은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "방글라데시", type: "colorOnly", mode: "colorOnly", answer: ["green", "red"], note: "가운데 원은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "중국", type: "colorOnly", mode: "colorOnly", answer: ["red", "yellow"], note: "별 문양은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "미국", type: "colorOnly", mode: "colorOnly", answer: ["red", "white", "blue"], note: "별과 줄무늬는 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "영국", type: "colorOnly", mode: "colorOnly", answer: ["blue", "white", "red"], note: "십자 문양은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "브라질", type: "colorOnly", mode: "colorOnly", answer: ["green", "yellow", "blue", "white"], note: "마름모와 원, 별 문양은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "대한민국", type: "colorOnly", mode: "colorOnly", answer: ["white", "red", "blue", "black"], note: "태극과 건곤감리 문양은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "튀르키예", type: "colorOnly", mode: "colorOnly", answer: ["red", "white"], note: "초승달과 별은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." },
+      { country: "파키스탄", type: "colorOnly", mode: "colorOnly", answer: ["green", "white"], note: "초승달과 별은 도형으로 그리지 않고 색상만 선택합니다. 순서는 상관없습니다." }
+    ];
+
+    let currentIndex = 0;
+    let selectedColor = null;
+    let userAnswer = [];
+    let score = 0;
+    let locked = false;
+    let gameQuestions = [];
+
+    document.getElementById("totalNo").innerText = questions.length;
+
+    function uniqueColors(colors) {
+      const result = [];
+      colors.forEach(function(color) {
+        if (!result.includes(color)) {
+          result.push(color);
+        }
+      });
+      return result;
+    }
+
+    function shuffleArray(array) {
+      const copy = array.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = temp;
+      }
+      return copy;
+    }
+
+    function initializeGame() {
+      // 게임을 새로 시작할 때마다 문제 순서를 랜덤으로 섞음
+      gameQuestions = shuffleArray(questions);
+      currentIndex = 0;
+      document.getElementById("totalNo").innerText = gameQuestions.length;
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = gameQuestions[currentIndex];
+
+      selectedColor = null;
+      locked = false;
+      userAnswer = new Array(q.answer.length).fill(null);
+
+      document.getElementById("questionNo").innerText = currentIndex + 1;
+      document.getElementById("countryName").innerText = "나라: " + q.country;
+      document.getElementById("message").innerText = "";
+      document.getElementById("message").style.color = "black";
+
+      const questionNote = document.getElementById("questionNote");
+      if (q.mode === "colorOnly") {
+        questionNote.style.display = "block";
+        questionNote.innerText = q.note || "문양은 그리지 않고 색상만 선택합니다. 순서는 상관없습니다.";
+      } else {
+        questionNote.style.display = "block";
+        questionNote.innerText = "색띠형 국기입니다. 위에서 아래 또는 왼쪽에서 오른쪽 순서대로 색을 배치하세요.";
+      }
+
+      const flag = document.getElementById("flag");
+      flag.className = "flag " + q.type;
+      flag.innerHTML = "";
+
+      for (let i = 0; i < q.answer.length; i++) {
+        const slot = document.createElement("div");
+        slot.className = "slot";
+
+        if (q.weights && q.weights[i]) {
+          slot.style.flexGrow = q.weights[i];
+        } else {
+          slot.style.flexGrow = 1;
+        }
+
+        if (q.mode === "colorOnly") {
+          slot.innerText = "색상";
+        }
+
+        slot.onclick = function() {
+          fillSlot(i, slot);
+        };
+
+        flag.appendChild(slot);
+      }
+
+      makePalette();
+    }
+
+    function makePalette() {
+      const q = gameQuestions[currentIndex];
+      const palette = document.getElementById("palette");
+      palette.innerHTML = "";
+
+      // 현재 문제의 국기에 들어가는 색상만 선택지로 표시
+      const paletteColors = shuffleArray(uniqueColors(q.answer));
+
+      paletteColors.forEach(function(color) {
+        const btn = document.createElement("div");
+        btn.className = "color-btn";
+        btn.style.backgroundColor = colorMap[color];
+        btn.title = colorNameMap[color];
+
+        btn.onclick = function() {
+          if (locked === true) {
+            return;
+          }
+
+          selectedColor = color;
+
+          const allButtons = document.querySelectorAll(".color-btn");
+          allButtons.forEach(function(button) {
+            button.classList.remove("selected");
+          });
+
+          btn.classList.add("selected");
+
+          document.getElementById("message").innerText = colorNameMap[color] + " 선택됨";
+          document.getElementById("message").style.color = "black";
+        };
+
+        palette.appendChild(btn);
+      });
+    }
+
+    function fillSlot(index, slot) {
+      if (locked === true) {
+        return;
+      }
+
+      if (selectedColor === null) {
+        alert("먼저 색상을 선택하세요.");
+        return;
+      }
+
+      userAnswer[index] = selectedColor;
+      slot.style.backgroundColor = colorMap[selectedColor];
+      slot.innerText = "";
+
+      const allFilled = userAnswer.every(function(color) {
+        return color !== null;
+      });
+
+      if (allFilled) {
+        checkAnswer();
+      }
+    }
+
+    function sameColorsWithoutOrder(a, b) {
+      const sortedA = a.slice().sort();
+      const sortedB = b.slice().sort();
+
+      if (sortedA.length !== sortedB.length) {
+        return false;
+      }
+
+      for (let i = 0; i < sortedA.length; i++) {
+        if (sortedA[i] !== sortedB[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    function checkAnswer() {
+      const q = gameQuestions[currentIndex];
+
+      let correct = true;
+
+      if (q.mode === "colorOnly") {
+        // 문양형 국기는 색상만 맞히면 되므로 순서는 보지 않음
+        correct = sameColorsWithoutOrder(userAnswer, q.answer);
+      } else {
+        // 색띠형 국기는 배열 순서까지 확인
+        for (let i = 0; i < q.answer.length; i++) {
+          if (q.answer[i] !== userAnswer[i]) {
+            correct = false;
+          }
+        }
+      }
+
+      locked = true;
+
+      if (correct) {
+        document.getElementById("message").innerText = "정답입니다! 다음 문제로 넘어갑니다.";
+        document.getElementById("message").style.color = "green";
+
+        score = score + 1;
+        document.getElementById("score").innerText = score;
+
+        setTimeout(function() {
+          goToNextQuestion();
+        }, 1000);
+
+      } else {
+        document.getElementById("message").innerText = "틀렸습니다. 현재 문제를 다시 시작합니다.";
+        document.getElementById("message").style.color = "red";
+
+        setTimeout(function() {
+          loadQuestion();
+        }, 1000);
+      }
+    }
+
+    function goToNextQuestion() {
+      currentIndex = currentIndex + 1;
+
+      // 50문제를 모두 풀면 다시 랜덤 순서로 섞어서 새 라운드 시작
+      if (currentIndex >= gameQuestions.length) {
+        gameQuestions = shuffleArray(questions);
+        currentIndex = 0;
+      }
+
+      loadQuestion();
+    }
+
+    initializeGame();
+  </script>
+
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function() {
+        navigator.serviceWorker.register("service-worker.js");
+      });
+    }
+  </script>
+
+</body>
+</html>
