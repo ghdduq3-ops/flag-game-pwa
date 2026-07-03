@@ -1,40 +1,15 @@
-const CACHE_NAME = "flag-game-pwa-v1";
-const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
-];
-
-self.addEventListener("install", function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(FILES_TO_CACHE);
-    })
-  );
+const CACHE_NAME = "flag-coloring-layout-v19";
+const FILES_TO_CACHE = ["./", "./index.html?v=19", "./index.html", "./manifest.json", "./flag_bgm_exciting.wav", "./icons/icon.svg"];
+self.addEventListener("install", e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(FILES_TO_CACHE)));
   self.skipWaiting();
 });
-
-self.addEventListener("activate", function(event) {
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
+self.addEventListener("activate", e => {
+  e.waitUntil(caches.keys().then(names => Promise.all(names.map(name => {
+    if (name !== CACHE_NAME) return caches.delete(name);
+  }))));
   self.clients.claim();
 });
-
-self.addEventListener("fetch", function(event) {
-  event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
-    })
-  );
+self.addEventListener("fetch", e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
