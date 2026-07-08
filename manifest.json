@@ -1,7 +1,7 @@
 {
   "name": "소희의 캐릭터 자동차 퍼즐",
   "short_name": "소희퍼즐",
-  "description": "캐릭터와 자동차 수가 추가된 퍼즐 게임",
+  "description": "화면 확대·축소 기능이 추가된 캐릭터 자동차 퍼즐 게임",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
