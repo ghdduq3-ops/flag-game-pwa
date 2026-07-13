@@ -1,18 +1,26 @@
 {
-  "name": "소희의 캐릭터 자동차 퍼즐",
-  "short_name": "소희퍼즐",
-  "description": "화면 확대·축소 기능이 추가된 캐릭터 자동차 퍼즐 게임",
+  "name": "소희의 50가지 세상 퍼즐",
+  "short_name": "소희 50퍼즐",
+  "description": "동물, 캐릭터, 차량, 건물·명소, 사물, 자연, 음식 비율을 균형 있게 재구성한 50개 퍼즐 PWA 게임입니다.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "landscape",
-  "background_color": "#d8ecff",
+  "background_color": "#fff3cd",
   "theme_color": "#90b96f",
+  "orientation": "landscape-primary",
+  "lang": "ko-KR",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
