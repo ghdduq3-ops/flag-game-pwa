@@ -1,7 +1,7 @@
 {
-  "name": "소희의 50가지 세상 퍼즐",
-  "short_name": "소희 50퍼즐",
-  "description": "동물, 캐릭터, 차량, 건물·명소, 사물, 자연, 음식 비율을 균형 있게 재구성한 50개 퍼즐 PWA 게임입니다.",
+  "name": "소희의 100가지 세상 퍼즐",
+  "short_name": "소희 퍼즐",
+  "description": "캐릭터에 팔과 다리를 추가하고, 여아 취향의 더 화사한 파스텔 색감으로 개선한 100가지 퍼즐 PWA 게임입니다.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
